@@ -1,32 +1,73 @@
+import { useState } from "react";
 import { startingHero } from "./game/hero";
 import { trainingSlime } from "./game/enemy";
-import { useState } from "react";
+import { applyDamage, calculateDamage } from "./game/battleEngine";
 
 function App() {
-const [hero] = useState(startingHero);
-const [enemy] = useState(trainingSlime);
+  const [hero, setHero] = useState(startingHero);
+  const [enemy, setEnemy] = useState(trainingSlime);
+  const [log, setLog] = useState<string[]>(["A Training Slime appears!"]);
 
-return (
-  <main>
-    <h1>{trainingSlime.name}</h1>
+  function handleAttack() {
+    const heroDamage = calculateDamage(hero, enemy);
+    const updatedEnemy = applyDamage(enemy, heroDamage);
 
-    <p>
-      HP: {trainingSlime.hp}/{trainingSlime.maxHp}
-    </p>
+    setEnemy(updatedEnemy);
 
-    <hr />
+    if (updatedEnemy.hp <= 0) {
+      setLog((prev) => [
+        `${hero.name} attacks for ${heroDamage} damage.`,
+        `${enemy.name} was defeated!`,
+        ...prev,
+      ]);
+      return;
+    }
 
-    <h2>{startingHero.name}</h2>
+    const enemyDamage = calculateDamage(enemy, hero);
+    const updatedHero = applyDamage(hero, enemyDamage);
 
-    <p>
-      HP: {startingHero.hp}/{startingHero.maxHp}
-    </p>
+    setHero(updatedHero);
 
-    <p>
-      MP: {startingHero.mp}/{startingHero.maxMp}
-    </p>
-  </main>
-);
+    setLog((prev) => [
+      `${hero.name} attacks for ${heroDamage} damage.`,
+      `${enemy.name} attacks for ${enemyDamage} damage.`,
+      ...prev,
+    ]);
+  }
+
+  return (
+    <main>
+      <h1>{enemy.name}</h1>
+
+      <p>
+        HP: {enemy.hp}/{enemy.maxHp}
+      </p>
+
+      <hr />
+
+      <h2>{hero.name}</h2>
+
+      <p>
+        HP: {hero.hp}/{hero.maxHp}
+      </p>
+
+      <p>
+        MP: {hero.mp}/{hero.maxMp}
+      </p>
+
+      <hr />
+
+      <button onClick={handleAttack}>Attack</button>
+
+      <section>
+        <h3>Battle Log</h3>
+
+        {log.map((entry, index) => (
+          <p key={index}>{entry}</p>
+        ))}
+      </section>
+    </main>
+  );
 }
 
 export default App;
