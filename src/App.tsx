@@ -25,6 +25,7 @@ function App() {
         `${hero.name} attacks for ${heroDamage} damage.`,
         `${enemy.name} was defeated!`,
       ]);
+
       return;
     }
 
@@ -38,6 +39,13 @@ function App() {
       `${hero.name} attacks for ${heroDamage} damage.`,
       `${enemy.name} attacks for ${enemyDamage} damage.`,
     ]);
+  }
+
+  function handleRestart() {
+    setHero(startingHero);
+    setEnemy(trainingSlime);
+    setIsBattleOver(false);
+    setLog(["A Training Slime appears!"]);
   }
 
   return (
@@ -66,7 +74,12 @@ function App() {
         Attack
       </button>
 
-      {isBattleOver && <h2>Victory!</h2>}
+      {isBattleOver && (
+        <>
+          <h2>Victory!</h2>
+          <button onClick={handleRestart}>Restart Battle</button>
+        </>
+      )}
 
       <section>
         <h3>Battle Log</h3>
