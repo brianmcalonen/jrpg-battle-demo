@@ -1,13 +1,23 @@
 import { useState } from "react";
 import { BattleLog } from "./components/BattleLog";
 import { CommandMenu } from "./components/CommandMenu";
+import { FighterSprite } from "./components/FighterSprite";
 import { HpBar } from "./components/HpBar";
 import { applyDamage, calculateDamage } from "./game/battleEngine";
 import { enemies } from "./game/enemy";
 import { startingHero } from "./game/hero";
 import type { Enemy, Fighter } from "./game/types";
+import "./App.css";
 
 const XP_TO_LEVEL_2 = 25;
+
+function getEnemySprite(enemyName: string): "slime" | "rat" {
+  if (enemyName.toLowerCase().includes("rat")) {
+    return "rat";
+  }
+
+  return "slime";
+}
 
 function applyVictoryReward(hero: Fighter, enemy: Enemy) {
   const updatedXp = hero.xp + enemy.xpReward;
@@ -55,7 +65,11 @@ function App() {
     null
   );
 
-  function handleVictory(currentHero: Fighter, defeatedEnemy: Enemy, actionLog: string) {
+  function handleVictory(
+    currentHero: Fighter,
+    defeatedEnemy: Enemy,
+    actionLog: string
+  ) {
     const { updatedHero, rewardLog } = applyVictoryReward(
       currentHero,
       defeatedEnemy
@@ -201,80 +215,100 @@ function App() {
   }
 
   return (
-    <main>
-      <section>
-        <h1>{enemy.name}</h1>
+    <main className="battle-screen">
+      <section className="battlefield">
+        <div className="hero-zone">
+          <FighterSprite variant="hero" />
+        </div>
 
-        <HpBar current={enemy.hp} max={enemy.maxHp} />
+        <div className="enemy-zone">
+          <div className="enemy-card battle-panel">
+            <h1>{enemy.name}</h1>
+            <HpBar current={enemy.hp} max={enemy.maxHp} />
+            <p>
+              HP {enemy.hp}/{enemy.maxHp}
+            </p>
+          </div>
 
-        <p>
-          HP: {enemy.hp}/{enemy.maxHp}
-        </p>
+          <FighterSprite variant={getEnemySprite(enemy.name)} />
+        </div>
       </section>
 
-      <hr />
+      <section className="hud">
+        <section className="battle-panel status-panel">
+          <div className="status-row">
+            <strong>{hero.name}</strong>
+            <span>LV {hero.level}</span>
+          </div>
 
-      <section>
-        <h2>
-          {hero.name} - Level {hero.level}
-        </h2>
+          <div className="status-row">
+            <span>HP</span>
+            <span>
+              {hero.hp}/{hero.maxHp}
+            </span>
+          </div>
 
-        <HpBar current={hero.hp} max={hero.maxHp} />
+          <HpBar current={hero.hp} max={hero.maxHp} />
 
-        <p>
-          HP: {hero.hp}/{hero.maxHp}
-        </p>
+          <div className="status-row">
+            <span>MP</span>
+            <span>
+              {hero.mp}/{hero.maxMp}
+            </span>
+          </div>
 
-        <p>
-          MP: {hero.mp}/{hero.maxMp}
-        </p>
+          <HpBar current={hero.mp} max={hero.maxMp} variant="mp" />
 
-        <p>XP: {hero.xp}</p>
+          <div className="status-row">
+            <span>XP</span>
+            <span>{hero.xp}</span>
+          </div>
 
-        <p>
-          Attack: {hero.attack} | Defense: {hero.defense}
-        </p>
+          <div className="status-row">
+            <span>ATK {hero.attack}</span>
+            <span>DEF {hero.defense}</span>
+          </div>
+        </section>
+
+        <CommandMenu
+          isBattleOver={isBattleOver}
+          canUsePowerStrike={hero.mp >= 5}
+          onAttack={handleAttack}
+          onPowerStrike={handlePowerStrike}
+          onDefend={handleDefend}
+        />
+
+        <BattleLog log={log} />
       </section>
-
-      <hr />
 
       {battleResult === "victory" && (
-        <>
-          <h2>Victory!</h2>
+        <section className="result-overlay">
+          <div className="battle-panel result-box">
+            <h2>Victory!</h2>
 
-          {battleIndex < enemies.length - 1 ? (
-            <>
-              <button onClick={handleNextBattle}>Next Battle</button>
-
-              <button onClick={handleRestart}>Restart Demo</button>
-            </>
-          ) : (
-            <>
-              <h3>Demo Complete!</h3>
-
-              <button onClick={handleRestart}>Restart Demo</button>
-            </>
-          )}
-        </>
+            {battleIndex < enemies.length - 1 ? (
+              <>
+                <button onClick={handleNextBattle}>Next Battle</button>
+                <button onClick={handleRestart}>Restart Demo</button>
+              </>
+            ) : (
+              <>
+                <h3>Demo Complete!</h3>
+                <button onClick={handleRestart}>Restart Demo</button>
+              </>
+            )}
+          </div>
+        </section>
       )}
 
       {battleResult === "defeat" && (
-        <>
-          <h2>Defeat...</h2>
-
-          <button onClick={handleRestart}>Restart Demo</button>
-        </>
+        <section className="result-overlay">
+          <div className="battle-panel result-box">
+            <h2>Defeat...</h2>
+            <button onClick={handleRestart}>Restart Demo</button>
+          </div>
+        </section>
       )}
-
-      <CommandMenu
-        isBattleOver={isBattleOver}
-        canUsePowerStrike={hero.mp >= 5}
-        onAttack={handleAttack}
-        onPowerStrike={handlePowerStrike}
-        onDefend={handleDefend}
-      />
-
-      <BattleLog log={log} />
     </main>
   );
 }

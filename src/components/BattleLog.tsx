@@ -3,13 +3,17 @@ type BattleLogProps = {
 };
 
 export function BattleLog({ log }: BattleLogProps) {
+  const latestEntries = log.slice(-10);
+
   return (
-    <section>
+    <section className="battle-panel battle-log">
       <h3>Battle Log</h3>
 
-      {log.map((entry, index) => (
-        <p key={index}>{entry}</p>
-      ))}
+      <div className="battle-log-entries">
+        {latestEntries.map((entry, index) => (
+          <p key={`${entry}-${index}`}>{entry}</p>
+        ))}
+      </div>
     </section>
   );
 }

@@ -1,20 +1,17 @@
 type HpBarProps = {
   current: number;
   max: number;
+  variant?: "hp" | "mp";
 };
 
-export function HpBar({ current, max }: HpBarProps) {
+export function HpBar({ current, max, variant = "hp" }: HpBarProps) {
   const percentage = Math.max(0, (current / max) * 100);
 
   return (
-    <div style={{ width: "100%", background: "#440000", height: 16 }}>
+    <div className={`${variant}-bar stat-bar`}>
       <div
-        style={{
-          width: `${percentage}%`,
-          background: "#19c463",
-          height: "100%",
-          transition: "width 0.2s ease",
-        }}
+        className={`${variant}-fill stat-fill`}
+        style={{ width: `${percentage}%` }}
       />
     </div>
   );
