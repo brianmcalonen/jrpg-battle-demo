@@ -4,7 +4,6 @@ type CommandMenuProps = {
   onAttack: () => void;
   onPowerStrike: () => void;
   onDefend: () => void;
-  onRestart: () => void;
 };
 
 export function CommandMenu({
@@ -13,10 +12,9 @@ export function CommandMenu({
   onAttack,
   onPowerStrike,
   onDefend,
-  onRestart,
 }: CommandMenuProps) {
   if (isBattleOver) {
-    return <button onClick={onRestart}>Restart Battle</button>;
+    return null;
   }
 
   return (

@@ -3,17 +3,20 @@ import { BattleLog } from "./components/BattleLog";
 import { CommandMenu } from "./components/CommandMenu";
 import { HpBar } from "./components/HpBar";
 import { applyDamage, calculateDamage } from "./game/battleEngine";
-import { trainingSlime } from "./game/enemy";
+import { enemies } from "./game/enemy";
 import { startingHero } from "./game/hero";
 
 function App() {
-  const [hero, setHero] = useState(startingHero);
-  const [enemy, setEnemy] = useState(trainingSlime);
+  const [hero, setHero] = useState({ ...startingHero });
+  const [battleIndex, setBattleIndex] = useState(0);
+  const [enemy, setEnemy] = useState({ ...enemies[0] });
+
   const [log, setLog] = useState<string[]>([
-    "A Training Slime appears!",
+    `${enemies[0].name} appears!`,
   ]);
 
   const [isBattleOver, setIsBattleOver] = useState(false);
+
   const [battleResult, setBattleResult] = useState<
     "victory" | "defeat" | null
   >(null);
@@ -22,7 +25,6 @@ function App() {
     if (isBattleOver) return;
 
     const heroDamage = calculateDamage(hero, enemy);
-
     const updatedEnemy = applyDamage(enemy, heroDamage);
 
     setEnemy(updatedEnemy);
@@ -41,7 +43,6 @@ function App() {
     }
 
     const enemyDamage = calculateDamage(enemy, hero);
-
     const updatedHero = applyDamage(hero, enemyDamage);
 
     setHero(updatedHero);
@@ -66,11 +67,7 @@ function App() {
       mp: hero.mp - 5,
     };
 
-    const heroDamage = calculateDamage(
-      updatedHero,
-      enemy,
-      1.75
-    );
+    const heroDamage = calculateDamage(updatedHero, enemy, 1.75);
 
     const updatedEnemy = applyDamage(enemy, heroDamage);
 
@@ -78,6 +75,7 @@ function App() {
 
     if (updatedEnemy.hp <= 0) {
       setHero(updatedHero);
+
       setIsBattleOver(true);
       setBattleResult("victory");
 
@@ -92,10 +90,7 @@ function App() {
 
     const enemyDamage = calculateDamage(enemy, updatedHero);
 
-    const damagedHero = applyDamage(
-      updatedHero,
-      enemyDamage
-    );
+    const damagedHero = applyDamage(updatedHero, enemyDamage);
 
     setHero(damagedHero);
 
@@ -119,10 +114,7 @@ function App() {
       Math.floor(calculateDamage(enemy, hero) / 2)
     );
 
-    const updatedHero = applyDamage(
-      hero,
-      reducedDamage
-    );
+    const updatedHero = applyDamage(hero, reducedDamage);
 
     setHero(updatedHero);
 
@@ -138,14 +130,36 @@ function App() {
     ]);
   }
 
-  function handleRestart() {
-    setHero(startingHero);
-    setEnemy(trainingSlime);
+  function handleNextBattle() {
+    const nextIndex = battleIndex + 1;
+
+    if (nextIndex >= enemies.length) {
+      return;
+    }
+
+    setBattleIndex(nextIndex);
+    setEnemy({ ...enemies[nextIndex] });
 
     setBattleResult(null);
     setIsBattleOver(false);
 
-    setLog(["A Training Slime appears!"]);
+    setLog((prev) => [
+      ...prev,
+      "---",
+      `${enemies[nextIndex].name} appears!`,
+    ]);
+  }
+
+  function handleRestart() {
+    setHero({ ...startingHero });
+
+    setBattleIndex(0);
+    setEnemy({ ...enemies[0] });
+
+    setBattleResult(null);
+    setIsBattleOver(false);
+
+    setLog([`${enemies[0].name} appears!`]);
   }
 
   return (
@@ -185,11 +199,39 @@ function App() {
       <hr />
 
       {battleResult === "victory" && (
-        <h2>Victory!</h2>
+        <>
+          <h2>Victory!</h2>
+
+          {battleIndex < enemies.length - 1 ? (
+            <>
+              <button onClick={handleNextBattle}>
+                Next Battle
+              </button>
+
+              <button onClick={handleRestart}>
+                Restart Demo
+              </button>
+            </>
+          ) : (
+            <>
+              <h3>Demo Complete!</h3>
+
+              <button onClick={handleRestart}>
+                Restart Demo
+              </button>
+            </>
+          )}
+        </>
       )}
 
       {battleResult === "defeat" && (
-        <h2>Defeat...</h2>
+        <>
+          <h2>Defeat...</h2>
+
+          <button onClick={handleRestart}>
+            Restart Demo
+          </button>
+        </>
       )}
 
       <CommandMenu
@@ -198,7 +240,6 @@ function App() {
         onAttack={handleAttack}
         onPowerStrike={handlePowerStrike}
         onDefend={handleDefend}
-        onRestart={handleRestart}
       />
 
       <BattleLog log={log} />
