@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { startingHero } from "./game/hero";
-import { trainingSlime } from "./game/enemy";
+import { BattleLog } from "./components/BattleLog";
+import { CommandMenu } from "./components/CommandMenu";
+import { HpBar } from "./components/HpBar";
 import { applyDamage, calculateDamage } from "./game/battleEngine";
+import { trainingSlime } from "./game/enemy";
+import { startingHero } from "./game/hero";
 
 function App() {
   const [hero, setHero] = useState(startingHero);
@@ -41,6 +44,44 @@ function App() {
     ]);
   }
 
+  function handlePowerStrike() {
+    if (isBattleOver || hero.mp < 5) return;
+
+    const updatedHero = {
+      ...hero,
+      mp: hero.mp - 5,
+    };
+
+    const heroDamage = calculateDamage(updatedHero, enemy, 1.75);
+    const updatedEnemy = applyDamage(enemy, heroDamage);
+
+    setHero(updatedHero);
+    setEnemy(updatedEnemy);
+
+    if (updatedEnemy.hp <= 0) {
+      setIsBattleOver(true);
+
+      setLog((prev) => [
+        ...prev,
+        `${hero.name} uses Power Strike for ${heroDamage} damage.`,
+        `${enemy.name} was defeated!`,
+      ]);
+
+      return;
+    }
+
+    const enemyDamage = calculateDamage(enemy, updatedHero);
+    const damagedHero = applyDamage(updatedHero, enemyDamage);
+
+    setHero(damagedHero);
+
+    setLog((prev) => [
+      ...prev,
+      `${hero.name} uses Power Strike for ${heroDamage} damage.`,
+      `${enemy.name} attacks for ${enemyDamage} damage.`,
+    ]);
+  }
+
   function handleRestart() {
     setHero(startingHero);
     setEnemy(trainingSlime);
@@ -50,44 +91,40 @@ function App() {
 
   return (
     <main>
-      <h1>{enemy.name}</h1>
-
-      <p>
-        HP: {enemy.hp}/{enemy.maxHp}
-      </p>
-
-      <hr />
-
-      <h2>{hero.name}</h2>
-
-      <p>
-        HP: {hero.hp}/{hero.maxHp}
-      </p>
-
-      <p>
-        MP: {hero.mp}/{hero.maxMp}
-      </p>
+      <section>
+        <h1>{enemy.name}</h1>
+        <HpBar current={enemy.hp} max={enemy.maxHp} />
+        <p>
+          HP: {enemy.hp}/{enemy.maxHp}
+        </p>
+      </section>
 
       <hr />
-
-      <button onClick={handleAttack} disabled={isBattleOver}>
-        Attack
-      </button>
-
-      {isBattleOver && (
-        <>
-          <h2>Victory!</h2>
-          <button onClick={handleRestart}>Restart Battle</button>
-        </>
-      )}
 
       <section>
-        <h3>Battle Log</h3>
-
-        {log.map((entry, index) => (
-          <p key={index}>{entry}</p>
-        ))}
+        <h2>{hero.name}</h2>
+        <HpBar current={hero.hp} max={hero.maxHp} />
+        <p>
+          HP: {hero.hp}/{hero.maxHp}
+        </p>
+        <p>
+          MP: {hero.mp}/{hero.maxMp}
+        </p>
       </section>
+
+      <hr />
+
+      {isBattleOver && <h2>Victory!</h2>}
+
+      <CommandMenu
+        isBattleOver={isBattleOver}
+        canUsePowerStrike={hero.mp >= 5}
+        onAttack={handleAttack}
+        onPowerStrike={handlePowerStrike}
+        onRestart={handleRestart}
+      />
+
+      <BattleLog log={log} />
     </main>
   );
 }
