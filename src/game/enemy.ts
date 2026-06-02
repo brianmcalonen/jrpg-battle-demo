@@ -6,6 +6,6 @@ export const trainingSlime: Fighter = {
   maxHp: 35,
   mp: 0,
   maxMp: 0,
-  attack: 6,
+  attack: 16,
   defense: 1,
 };

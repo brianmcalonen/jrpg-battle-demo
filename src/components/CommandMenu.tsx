@@ -3,6 +3,7 @@ type CommandMenuProps = {
   canUsePowerStrike: boolean;
   onAttack: () => void;
   onPowerStrike: () => void;
+  onDefend: () => void;
   onRestart: () => void;
 };
 
@@ -11,6 +12,7 @@ export function CommandMenu({
   canUsePowerStrike,
   onAttack,
   onPowerStrike,
+  onDefend,
   onRestart,
 }: CommandMenuProps) {
   if (isBattleOver) {
@@ -21,9 +23,14 @@ export function CommandMenu({
     <section>
       <button onClick={onAttack}>Attack</button>
 
-      <button onClick={onPowerStrike} disabled={!canUsePowerStrike}>
+      <button
+        onClick={onPowerStrike}
+        disabled={!canUsePowerStrike}
+      >
         Power Strike - 5 MP
       </button>
+
+      <button onClick={onDefend}>Defend</button>
     </section>
   );
 }
