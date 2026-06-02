@@ -7,14 +7,19 @@ function App() {
   const [hero, setHero] = useState(startingHero);
   const [enemy, setEnemy] = useState(trainingSlime);
   const [log, setLog] = useState<string[]>(["A Training Slime appears!"]);
+  const [isBattleOver, setIsBattleOver] = useState(false);
 
   function handleAttack() {
+    if (isBattleOver) return;
+
     const heroDamage = calculateDamage(hero, enemy);
     const updatedEnemy = applyDamage(enemy, heroDamage);
 
     setEnemy(updatedEnemy);
 
     if (updatedEnemy.hp <= 0) {
+      setIsBattleOver(true);
+
       setLog((prev) => [
         ...prev,
         `${hero.name} attacks for ${heroDamage} damage.`,
@@ -57,7 +62,11 @@ function App() {
 
       <hr />
 
-      <button onClick={handleAttack}>Attack</button>
+      <button onClick={handleAttack} disabled={isBattleOver}>
+        Attack
+      </button>
+
+      {isBattleOver && <h2>Victory!</h2>}
 
       <section>
         <h3>Battle Log</h3>
