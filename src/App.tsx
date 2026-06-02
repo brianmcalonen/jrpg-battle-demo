@@ -16,9 +16,9 @@ function App() {
 
     if (updatedEnemy.hp <= 0) {
       setLog((prev) => [
+        ...prev,
         `${hero.name} attacks for ${heroDamage} damage.`,
         `${enemy.name} was defeated!`,
-        ...prev,
       ]);
       return;
     }
@@ -29,9 +29,9 @@ function App() {
     setHero(updatedHero);
 
     setLog((prev) => [
+      ...prev,
       `${hero.name} attacks for ${heroDamage} damage.`,
       `${enemy.name} attacks for ${enemyDamage} damage.`,
-      ...prev,
     ]);
   }
 
